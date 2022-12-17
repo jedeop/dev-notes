@@ -1,0 +1,18 @@
+.container {
+  border-radius: 20px;
+  font-weight: 400;
+  font-size: 15px;
+  padding: 5px 10px;
+}
+
+.fill {
+  background: #4CB49C;
+  color: #FFFFFF;
+  border: none;
+}
+
+.stroke {
+  background: transparent;
+  color: #4CB49C;
+  border: 1px solid #4CB49C;
+}

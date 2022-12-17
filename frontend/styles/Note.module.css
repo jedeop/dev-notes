@@ -1,0 +1,34 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  gap: 5px;
+  background: #F2F2F2;
+  border: 1px solid #E6E6E6;
+  box-shadow: 0px 0px 15px -5px rgba(0, 0, 0, 0.25);
+  border-radius: 20px;
+}
+
+.date {
+  font-weight: 300;
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.text {
+  font-weight: 400;
+  font-size: 15px;
+}
+
+.foot {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tags {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
