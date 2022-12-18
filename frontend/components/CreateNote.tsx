@@ -2,6 +2,7 @@ import { ChangeEvent, useState } from "react";
 import CreatableSelect from 'react-select/creatable';
 import { mutate } from "swr";
 import { NoteInputType } from "../common/note";
+import { useToken } from "../common/token";
 import styles from "../styles/CreateNote.module.css";
 import Button from "./Button";
 
@@ -16,6 +17,8 @@ const options: Option[] = [
 ];
 
 export default function CreateNote() {
+  const [token] = useToken();
+
   const [text, setText] = useState('');
   function handleChange(event: ChangeEvent<HTMLTextAreaElement>) { 
     setText(event.target.value);
@@ -35,16 +38,26 @@ export default function CreateNote() {
       project: project.label,
       tags: tags.map(tag => tag.label),
     }
-    await fetch("/api/note", {
-      method: "POST",
-      body: JSON.stringify(body),
-    })
-    await mutate("/api/notes");
-    
-    setProject(null);
-    setTags([]);
-    setText("");
-    setStep(0);
+
+    try {
+      await fetch("/api/note", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(body),
+      })
+      setTimeout(() => {
+        mutate("/api/notes");
+      }, 3 * 1000)
+      
+      setProject(null);
+      setTags([]);
+      setText("");
+      setStep(0);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   return (

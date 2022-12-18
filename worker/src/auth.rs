@@ -2,10 +2,11 @@ use argon2::{
     password_hash::{rand_core::OsRng, Result, SaltString},
     Argon2, PasswordHash, PasswordHasher, PasswordVerifier,
 };
-use chrono::{Duration, NaiveDateTime, Utc};
+use chrono::{Duration, Utc};
 use hmac::{Hmac, Mac};
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
+use worker::console_log;
 
 #[derive(Deserialize)]
 pub(crate) struct PasswordInput {
@@ -75,9 +76,10 @@ impl Claims {
         let key = Hmac::<Sha256>::new_from_slice(secret.as_bytes())?;
         let claims: Claims = token.verify_with_key(&key)?;
 
-        if NaiveDateTime::from_timestamp_millis(claims.exp) <= Some(Utc::now().naive_local()) {
+        if claims.exp >= Utc::now().naive_local().timestamp_millis() {
             Ok(claims)
         } else {
+            console_log!("expired");
             Err("Expired".into())
         }
     }

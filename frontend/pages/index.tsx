@@ -4,8 +4,10 @@ import Header from '../components/Header'
 import Note from '../components/Note'
 import CreateNote from '../components/CreateNote'
 import NoteList from '../components/NoteList'
+import { useToken } from '../common/token'
 
 export default function Home() {
+  const [token] = useToken();
   return (
     <>
       <Head>
@@ -15,7 +17,11 @@ export default function Home() {
       </Head>
       <Header />
       <main className={styles.main}>
-        <CreateNote />
+        {
+          token
+          ? <CreateNote />
+          : <></>
+        }
         <NoteList />
       </main>
     </>

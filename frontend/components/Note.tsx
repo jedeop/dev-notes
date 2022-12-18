@@ -7,11 +7,14 @@ import fetcher from "../common/fetcher";
 import parseJSON from "date-fns/parseJSON";
 import format from "date-fns/format";
 import ko from "date-fns/locale/ko/index.js";
+import { useToken } from "../common/token";
 
 interface Props {
   id: string,
 }
 export default function Note({ id }: Props) {
+  const [token] = useToken();
+
   const { data, error, isLoading } = useSWR<NoteType>(`/api/note/${id}`, fetcher)
 
   if (isLoading) {
@@ -41,7 +44,11 @@ export default function Note({ id }: Props) {
           <Tag text={note.project} />
           {note.tags.map(tag => (<Tag text={tag} key={tag} type="stroke" />))}
         </div>
-        <MoreHorizontal color="#949494" size={18} />
+        {
+          token
+          ? <MoreHorizontal color="#949494" size={18} />
+          : <></>
+        }
       </div>
     </div>
   )

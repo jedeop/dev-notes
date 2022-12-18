@@ -30,6 +30,7 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
             match ctx.var("JWT_SECRET") {
                 Ok(secret) => match req.headers().get("Authorization")? {
                     Some(authorization) => {
+                        console_log!("au {}", authorization);
                         let mut auth = authorization.split_whitespace();
                         match (auth.next(), auth.next()) {
                             (Some("Bearer"), Some(token)) => {
