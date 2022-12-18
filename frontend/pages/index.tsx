@@ -3,6 +3,7 @@ import styles from '../styles/Home.module.css'
 import Header from '../components/Header'
 import Note from '../components/Note'
 import CreateNote from '../components/CreateNote'
+import NoteList from '../components/NoteList'
 
 export default function Home() {
   return (
@@ -15,9 +16,7 @@ export default function Home() {
       <Header />
       <main className={styles.main}>
         <CreateNote />
-        <Note />
-        <Note />
-        <Note />
+        <NoteList />
       </main>
     </>
   )
