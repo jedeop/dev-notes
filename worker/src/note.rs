@@ -14,11 +14,7 @@ impl Note {
     pub(crate) fn from_input(input: NoteInput) -> Self {
         let uuid = Uuid::new_v4();
         let date = Utc::now().naive_local();
-        let id = format!(
-            "note:{}:{}",
-            99999999999999 - date.timestamp_millis(),
-            uuid.to_string()
-        );
+        let id = format!("note:{}:{}", 99999999999999 - date.timestamp_millis(), uuid);
         Self {
             id,
             date,
