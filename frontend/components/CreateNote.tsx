@@ -1,6 +1,7 @@
 import { ChangeEvent, useState } from "react";
-import { SingleValue } from "react-select";
 import CreatableSelect from 'react-select/creatable';
+import { mutate } from "swr";
+import { NoteInputType } from "../common/note";
 import styles from "../styles/CreateNote.module.css";
 import Button from "./Button";
 
@@ -25,6 +26,27 @@ export default function CreateNote() {
 
   const [step, setStep] = useState(0);
 
+  async function handleSubmit() {
+    if (!project) {
+      return;
+    }
+    const body: NoteInputType = {
+      content: text,
+      project: project.label,
+      tags: tags.map(tag => tag.label),
+    }
+    await fetch("/api/note", {
+      method: "POST",
+      body: JSON.stringify(body),
+    })
+    await mutate("/api/notes");
+    
+    setProject(null);
+    setTags([]);
+    setText("");
+    setStep(0);
+  }
+
   return (
     <div className={styles.container}>
       {
@@ -34,7 +56,11 @@ export default function CreateNote() {
             <textarea className={styles.textarea} placeholder="방금 무엇을 했나요?" rows={3} value={text} onChange={handleChange}></textarea>
             <div className={styles.foot}>
               <div className={styles.rightBtn}>
-                <Button text="다음" onClick={() => setStep(1)} />
+                <Button text="다음" onClick={() => {
+                  if (text.length !== 0) {
+                    setStep(1)
+                  }
+                }} />
               </div>
             </div>
           </>
@@ -70,7 +96,7 @@ export default function CreateNote() {
             />
             <div className={styles.rightBtn}>
               <Button text="취소" type="stroke" onClick={() => setStep(0)} />
-              <Button text="작성" />
+              <Button text="작성" onClick={handleSubmit} />
             </div>
           </div>
         )

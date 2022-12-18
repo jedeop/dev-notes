@@ -25,7 +25,7 @@ export default function Note({ id }: Props) {
   if (error) {
     return (
       <div className={styles.container}>
-        에러 발생: {error}
+        에러 발생: {`${error}`}
       </div>
     )
   }
@@ -39,7 +39,7 @@ export default function Note({ id }: Props) {
       <div className={styles.foot}>
         <div className={styles.tags}>
           <Tag text={note.project} />
-          {note.tags.map(tag => (<Tag text={tag} key={tag} />))}
+          {note.tags.map(tag => (<Tag text={tag} key={tag} type="stroke" />))}
         </div>
         <MoreHorizontal color="#949494" size={18} />
       </div>

@@ -3,6 +3,7 @@
   font-weight: 400;
   font-size: 15px;
   padding: 5px 10px;
+  cursor: pointer;
 }
 
 .fill {
@@ -10,9 +11,16 @@
   color: #FFFFFF;
   border: none;
 }
+.fill:hover {
+  background: #7FCAB8;
+}
 
 .stroke {
   background: transparent;
   color: #4CB49C;
   border: 1px solid #4CB49C;
+}
+.stroke:hover {
+  color: #7FCAB8;
+  border-color: #7FCAB8;
 }
