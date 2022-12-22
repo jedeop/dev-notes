@@ -1,6 +1,7 @@
 use auth::{check_admin, Claims, Password, PasswordInput};
 use note::{Note, NoteInput};
 
+use serde_json::json;
 use worker::*;
 
 mod auth;
@@ -100,7 +101,9 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
                     let admin_pw = Password::new(admin_pw.to_string());
                     match admin_pw.check(pw.get()) {
                         Ok(true) => match Claims::admin().token(&jwt_secret.to_string()) {
-                            Ok(token) => Response::ok(token),
+                            Ok(token) => Response::from_json(&json!({
+                                "token": token
+                            })),
                             Err(_) => Response::error("Internal Server Error", 500),
                         },
                         Ok(false) => Response::error("Bad Request", 400),
@@ -108,6 +111,17 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
                     }
                 }
                 _ => Response::error("No ADMIN_PW and/or JWT_SECRET", 500),
+            }
+        })
+        .get_async("/api/auth/admin", |req, ctx| async move {
+            match check_admin(&req, &ctx).await {
+                Ok(admin) => Response::from_json(&json!({
+                    "admin": admin
+                })),
+                Err(err) => {
+                    console_error!("Internal Server Error at DELETE /api/note/:id; {}", err);
+                    Response::error("Internal Server Error", 500)
+                }
             }
         })
         .run(req, env)

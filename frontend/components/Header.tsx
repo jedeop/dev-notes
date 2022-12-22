@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { Coffee, LogIn } from "react-feather";
-import { useToken } from "../common/token";
+import useAdmin from "../common/admin";
 import styles from "../styles/Header.module.css";
 
 export default function Header() {
-  const [token] = useToken();
+  const { admin } = useAdmin();
   return (
     <header className={styles.container}>
       <Link href="/">
@@ -14,7 +14,7 @@ export default function Header() {
         </div>
       </Link>
       {
-        token
+        admin
         ? <div></div>
         : (
         <Link href="/login" className={styles.right}>

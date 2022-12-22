@@ -29,7 +29,7 @@ export default function Login() {
       if (!res.ok) {
         throw new Error(`An error occurred while fetching the data: ${res.status} ${await res.text()}`)
       }
-      let token = await res.text();
+      let { token }: { token: string } = await res.json();
       setToken(token);
       router.push('/');
     } catch (error) {

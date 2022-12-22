@@ -7,13 +7,13 @@ import fetcher from "../common/fetcher";
 import parseJSON from "date-fns/parseJSON";
 import format from "date-fns/format";
 import ko from "date-fns/locale/ko/index.js";
-import { useToken } from "../common/token";
+import useAdmin from "../common/admin";
 
 interface Props {
   id: string,
 }
 export default function Note({ id }: Props) {
-  const [token] = useToken();
+  const { admin } = useAdmin();
 
   const { data, error, isLoading } = useSWR<NoteType>(`/api/note/${id}`, fetcher)
 
@@ -45,7 +45,7 @@ export default function Note({ id }: Props) {
           {note.tags.map(tag => (<Tag text={tag} key={tag} type="stroke" />))}
         </div>
         {
-          token
+          admin
           ? <MoreHorizontal color="#949494" size={18} />
           : <></>
         }

@@ -1,13 +1,12 @@
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 import Header from '../components/Header'
-import Note from '../components/Note'
 import CreateNote from '../components/CreateNote'
 import NoteList from '../components/NoteList'
-import { useToken } from '../common/token'
+import useAdmin from '../common/admin'
 
 export default function Home() {
-  const [token] = useToken();
+  const { admin } = useAdmin();
   return (
     <>
       <Head>
@@ -18,7 +17,7 @@ export default function Home() {
       <Header />
       <main className={styles.main}>
         {
-          token
+          admin
           ? <CreateNote />
           : <></>
         }
