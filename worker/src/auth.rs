@@ -6,7 +6,7 @@ use chrono::{Duration, Utc};
 use hmac::{Hmac, Mac};
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
-use worker::console_log;
+use worker::{console_log, Request, RouteContext};
 
 #[derive(Deserialize)]
 pub(crate) struct PasswordInput {
@@ -86,5 +86,23 @@ impl Claims {
 
     pub(crate) fn get_admin(&self) -> bool {
         self.admin
+    }
+}
+
+pub(crate) async fn check_admin(req: &Request, ctx: &RouteContext<()>) -> StdResult<bool> {
+    match req.headers().get("Authorization")? {
+        Some(authorization) => {
+            let mut auth = authorization.split_whitespace();
+            match (auth.next(), auth.next()) {
+                (Some("Bearer"), Some(token)) => {
+                    match Claims::verify(token, &ctx.var("JWT_SECRET")?.to_string()) {
+                        Ok(claims) => Ok(claims.get_admin()),
+                        Err(_) => Ok(false),
+                    }
+                }
+                _ => Ok(false),
+            }
+        }
+        None => Ok(false),
     }
 }

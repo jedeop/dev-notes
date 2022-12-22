@@ -1,4 +1,4 @@
-use auth::{Claims, Password, PasswordInput};
+use auth::{check_admin, Claims, Password, PasswordInput};
 use note::{Note, NoteInput};
 
 use worker::*;
@@ -27,38 +27,22 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
 
     router
         .post_async("/api/note", |mut req, ctx| async move {
-            match ctx.var("JWT_SECRET") {
-                Ok(secret) => match req.headers().get("Authorization")? {
-                    Some(authorization) => {
-                        console_log!("au {}", authorization);
-                        let mut auth = authorization.split_whitespace();
-                        match (auth.next(), auth.next()) {
-                            (Some("Bearer"), Some(token)) => {
-                                match Claims::verify(token, &secret.to_string()) {
-                                    Ok(claims) => {
-                                        if claims.get_admin() {
-                                            // Real Logic
-                                            let note_input = req.json::<NoteInput>().await?;
-                                            let note = Note::from_input(note_input);
+            match check_admin(&req, &ctx).await {
+                Ok(true) => {
+                    let note_input = req.json::<NoteInput>().await?;
+                    let note = Note::from_input(note_input);
 
-                                            let kv = ctx.kv("notes")?;
+                    let kv = ctx.kv("notes")?;
 
-                                            kv.put(note.id(), &note)?.execute().await?;
+                    kv.put(note.id(), &note)?.execute().await?;
 
-                                            Response::from_json(&note)
-                                        } else {
-                                            Response::error("Unauthorized", 401)
-                                        }
-                                    }
-                                    _ => Response::error("Unauthorized", 401),
-                                }
-                            }
-                            _ => Response::error("Unauthorized", 401),
-                        }
-                    }
-                    None => Response::error("Unauthorized", 401),
-                },
-                _ => Response::error("No JWT_SECRET", 500),
+                    Response::from_json(&note)
+                }
+                Ok(false) => Response::error("Unauthorized", 401),
+                Err(err) => {
+                    console_error!("Internal Server Error at POST /api/note; {}", err);
+                    Response::error("Internal Server Error", 500)
+                }
             }
         })
         .get_async("/api/notes", |_req, ctx| async move {
@@ -86,37 +70,20 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
             }
         })
         .delete_async("/api/note/:id", |req, ctx| async move {
-            match ctx.var("JWT_SECRET") {
-                Ok(secret) => match req.headers().get("Authorization")? {
-                    Some(authorization) => {
-                        let mut auth = authorization.split_whitespace();
-                        match (auth.next(), auth.next()) {
-                            (Some("Bearer"), Some(token)) => {
-                                match Claims::verify(token, &secret.to_string()) {
-                                    Ok(claims) => {
-                                        if claims.get_admin() {
-                                            // Real Logic
-                                            match ctx.param("id") {
-                                                Some(id) => {
-                                                    let kv = ctx.kv("notes")?;
-                                                    kv.delete(id).await?;
-                                                    Response::empty()
-                                                }
-                                                None => Response::error("Bad Request", 400),
-                                            }
-                                        } else {
-                                            Response::error("Unauthorized", 401)
-                                        }
-                                    }
-                                    _ => Response::error("Unauthorized", 401),
-                                }
-                            }
-                            _ => Response::error("Unauthorized", 401),
-                        }
+            match check_admin(&req, &ctx).await {
+                Ok(true) => match ctx.param("id") {
+                    Some(id) => {
+                        let kv = ctx.kv("notes")?;
+                        kv.delete(id).await?;
+                        Response::empty()
                     }
-                    None => Response::error("Unauthorized", 401),
+                    None => Response::error("Bad Request", 400),
                 },
-                _ => Response::error("No JWT_SECRET", 500),
+                Ok(false) => Response::error("Unauthorized", 401),
+                Err(err) => {
+                    console_error!("Internal Server Error at DELETE /api/note/:id; {}", err);
+                    Response::error("Internal Server Error", 500)
+                }
             }
         })
         .post_async("/api/auth/hashpw", |mut req, _ctx| async move {

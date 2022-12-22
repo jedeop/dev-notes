@@ -14,11 +14,12 @@ cfg-if = "0.1.2"
 worker = "0.0.11"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-uuid = { version = "1", features = ["v4", "fast-rng", "serde", "js"] }
 chrono ={ version = "0.4", features = ["serde"] }
 jwt = "0.16.0"
 hmac = "0.12.1"
 argon2 = "0.4.1"
+rand_core = { version = "0.6", features = ["getrandom"] }
+getrandom = { version = "0.2", features = ["js"] }
 sha2 = "0.10.6"
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
