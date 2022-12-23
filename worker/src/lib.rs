@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use auth::{check_admin, Claims, Password, PasswordInput};
 use note::{Note, NoteInput};
 
@@ -46,15 +48,25 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
                 }
             }
         })
-        .get_async("/api/notes", |_req, ctx| async move {
+        .get_async("/api/notes", |req, ctx| async move {
+            let query: HashMap<String, String> = req.url()?.query_pairs().into_owned().collect();
+
+            let limit = query
+                .get("limit")
+                .and_then(|s| s.parse::<u64>().ok())
+                .unwrap_or(10);
+            let cursor = query.get("cursor");
+
             let kv = ctx.kv("notes")?;
 
-            let notes = kv
-                .list()
-                .prefix("note:".to_string())
-                .limit(10)
-                .execute()
-                .await?;
+            let builder = kv.list().prefix("note:".to_string()).limit(limit);
+
+            let builder = match cursor {
+                Some(cursor) => builder.cursor(cursor.to_string()),
+                None => builder,
+            };
+
+            let notes = builder.execute().await?;
 
             Response::from_json(&notes)
         })
@@ -101,9 +113,7 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
                     let admin_pw = Password::new(admin_pw.to_string());
                     match admin_pw.check(pw.get()) {
                         Ok(true) => match Claims::admin().token(&jwt_secret.to_string()) {
-                            Ok(token) => Response::from_json(&json!({
-                                "token": token
-                            })),
+                            Ok(token) => Response::from_json(&json!({ "token": token })),
                             Err(_) => Response::error("Internal Server Error", 500),
                         },
                         Ok(false) => Response::error("Bad Request", 400),
@@ -115,9 +125,7 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
         })
         .get_async("/api/auth/admin", |req, ctx| async move {
             match check_admin(&req, &ctx).await {
-                Ok(admin) => Response::from_json(&json!({
-                    "admin": admin
-                })),
+                Ok(admin) => Response::from_json(&json!({ "admin": admin })),
                 Err(err) => {
                     console_error!("Internal Server Error at DELETE /api/note/:id; {}", err);
                     Response::error("Internal Server Error", 500)
