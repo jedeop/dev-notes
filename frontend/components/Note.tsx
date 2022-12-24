@@ -7,7 +7,7 @@ import fetcher from "../common/fetcher";
 import parseJSON from "date-fns/parseJSON";
 import format from "date-fns/format";
 import ko from "date-fns/locale/ko/index.js";
-import useAdmin from "../common/admin";
+import useAdmin from "../common/useAdmin";
 
 interface Props {
   id: string,

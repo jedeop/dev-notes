@@ -11,3 +11,13 @@ export interface NoteInputType {
   project: string,
   tags: string[],
 }
+
+export interface NoteListData {
+  keys: {
+    name: string,
+    // expiration: null,
+    // metadata: null
+  }[];
+  list_complete: boolean;
+  cursor: string | null;
+}

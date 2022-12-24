@@ -1,20 +1,16 @@
-import fetcher from "../common/fetcher";
-import useSWR from 'swr'
 import Note from "./Note";
 import styles from "../styles/NoteList.module.css";
-
-interface NoteListData {
-  keys: {
-    name: string,
-    // expiration: null,
-    // metadata: null
-  }[];
-  list_complete: boolean;
-  cursor: string | null;
-}
+import useNotes from "../common/useNotes";
+import useIntersect from "../common/useIntersect";
 
 export default function NoteList() {
-  const { data, error, isLoading } = useSWR<NoteListData>('/api/notes', fetcher)
+  const { data, error, isLoading, isValidating, loadMore } = useNotes();
+
+  const loadMoreRef = useIntersect(() => {
+    if (!data?.[data?.length - 1].list_complete && !isLoading && !isValidating) {
+      loadMore();
+    }
+  });
 
   if (isLoading) {
     return (
@@ -34,7 +30,8 @@ export default function NoteList() {
 
   return (
     <div className={styles.container}>
-      {data?.keys.map(({name}) => (<Note key={name} id={name} />))}
+      {data?.map(notes => notes.keys.map(({name}) => (<Note key={name} id={name} />)))}
+      <div ref={loadMoreRef}></div>
     </div>
   )
 }

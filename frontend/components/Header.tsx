@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Coffee, LogIn } from "react-feather";
-import useAdmin from "../common/admin";
+import useAdmin from "../common/useAdmin";
 import styles from "../styles/Header.module.css";
 
 export default function Header() {

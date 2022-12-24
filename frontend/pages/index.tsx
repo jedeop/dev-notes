@@ -3,7 +3,7 @@ import styles from '../styles/Home.module.css'
 import Header from '../components/Header'
 import CreateNote from '../components/CreateNote'
 import NoteList from '../components/NoteList'
-import useAdmin from '../common/admin'
+import useAdmin from '../common/useAdmin'
 
 export default function Home() {
   const { admin } = useAdmin();
