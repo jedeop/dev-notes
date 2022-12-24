@@ -2,6 +2,7 @@ import Note from "./Note";
 import styles from "../styles/NoteList.module.css";
 import useNotes from "../common/useNotes";
 import useIntersect from "../common/useIntersect";
+import Loading from "./Loading";
 
 export default function NoteList() {
   const { data, error, isLoading, isValidating, loadMore } = useNotes();
@@ -11,14 +12,6 @@ export default function NoteList() {
       loadMore();
     }
   });
-
-  if (isLoading) {
-    return (
-      <div>
-        로딩 중
-      </div>
-    )
-  }
 
   if (error) {
     return (
@@ -31,6 +24,7 @@ export default function NoteList() {
   return (
     <div className={styles.container}>
       {data?.map(notes => notes.keys.map(({name}) => (<Note key={name} id={name} />)))}
+      { isLoading || isValidating ? <Loading /> : null }
       <div ref={loadMoreRef}></div>
     </div>
   )

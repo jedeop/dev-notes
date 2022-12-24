@@ -8,6 +8,7 @@ import parseJSON from "date-fns/parseJSON";
 import format from "date-fns/format";
 import ko from "date-fns/locale/ko/index.js";
 import useAdmin from "../common/useAdmin";
+import Loading from "./Loading";
 
 interface Props {
   id: string,
@@ -20,7 +21,7 @@ export default function Note({ id }: Props) {
   if (isLoading) {
     return (
       <div className={styles.container}>
-        로딩 중
+        <Loading />
       </div>
     )
   }
