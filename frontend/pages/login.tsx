@@ -32,6 +32,7 @@ export default function Login() {
       let { token }: { token: string } = await res.json();
       setToken(token);
       router.push('/');
+      // router.back();
     } catch (error) {
       setError(`${error}`);
       setPassword('');

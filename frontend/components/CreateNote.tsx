@@ -5,18 +5,22 @@ import { NoteInputType } from "../common/note";
 import { useToken } from "../common/token";
 import styles from "../styles/CreateNote.module.css";
 import Button from "./Button";
+import { useRouter } from "next/router";
 
 interface Option {
   value: string;
   label: string;
 }
 const options: Option[] = [
-  { value: '깃털', label: '깃털' },
-  { value: '개발 일지', label: '개발 일지' },
-  { value: 'Bridge', label: 'Bridge' },
+  // { value: '깃털', label: '깃털' },
+  // { value: '개발 일지', label: '개발 일지' },
+  // { value: 'Bridge', label: 'Bridge' },
 ];
 
 export default function CreateNote() {
+  const router = useRouter();
+  const category = router.query.category as string | undefined;
+
   const [token] = useToken();
 
   const [text, setText] = useState('');
@@ -37,6 +41,7 @@ export default function CreateNote() {
       content: text,
       project: project.label,
       tags: tags.map(tag => tag.label),
+      category,
     }
 
     try {

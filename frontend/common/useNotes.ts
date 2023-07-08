@@ -12,15 +12,21 @@ interface useNotes {
   loadMore: () => void;
 }
 
-function getKey(pageIndex: number, previousPageData: NoteListData | null) {
-  if (previousPageData && previousPageData.list_complete) return null
+function getKeyFn(category?: string) {
+  return function getKey(pageIndex: number, previousPageData: NoteListData | null) {
+    if (previousPageData && previousPageData.list_complete) return null
 
-  if (pageIndex === 0) return `/api/notes?limit=${PAGE_LIMIT}`
+    let key = `/api/notes?limit=${PAGE_LIMIT}`;
+    
+    if (category) key += '&category=' + category;
 
-  return `/api/notes?cursor=${previousPageData?.cursor}&limit=${PAGE_LIMIT}`
+    if (pageIndex === 0) return key;
+
+    return key + '&cursor=' + previousPageData?.cursor;
+  }
 }
 
-export default function useNotes(): useNotes {
+export default function useNotes(category?: string): useNotes {
   const {
     data,
     error,
@@ -28,7 +34,7 @@ export default function useNotes(): useNotes {
     isValidating,
     size,
     setSize
-  } = useSWRInfinite<NoteListData>(getKey, fetcher)
+  } = useSWRInfinite<NoteListData>(getKeyFn(category), fetcher)
 
   function loadMore() {
     setSize(size + 1);

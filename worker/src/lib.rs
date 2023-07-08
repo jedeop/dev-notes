@@ -33,7 +33,7 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
             match check_admin(&req, &ctx).await {
                 Ok(true) => {
                     let note_input = req.json::<NoteInput>().await?;
-                    let note = Note::from_input(note_input);
+                    let note = Note::from(note_input);
 
                     let kv = ctx.kv("notes")?;
 
@@ -56,10 +56,17 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
                 .and_then(|s| s.parse::<u64>().ok())
                 .unwrap_or(10);
             let cursor = query.get("cursor");
+            let category = query.get("category");
 
             let kv = ctx.kv("notes")?;
 
-            let builder = kv.list().prefix("note:".to_string()).limit(limit);
+            let builder = kv
+                .list()
+                .prefix(format!(
+                    "note{}:",
+                    category.map_or_else(String::new, |value| value.to_string()),
+                ))
+                .limit(limit);
 
             let builder = match cursor {
                 Some(cursor) => builder.cursor(cursor.to_string()),

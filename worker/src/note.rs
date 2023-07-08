@@ -10,20 +10,25 @@ pub(crate) struct Note {
     tags: Vec<String>,
 }
 impl Note {
-    pub(crate) fn from_input(input: NoteInput) -> Self {
+    pub(crate) fn id(&self) -> &str {
+        self.id.as_ref()
+    }
+}
+impl From<NoteInput> for Note {
+    fn from(value: NoteInput) -> Self {
         let date = Utc::now().naive_local();
-        let id = format!("note:{}", 99999999999999 - date.timestamp_millis());
+        let id = format!(
+            "note{}:{}",
+            value.category.unwrap_or_default(),
+            99999999999999 - date.timestamp_millis()
+        );
         Self {
             id,
             date,
-            content: input.content,
-            project: input.project,
-            tags: input.tags,
+            content: value.content,
+            project: value.project,
+            tags: value.tags,
         }
-    }
-
-    pub(crate) fn id(&self) -> &str {
-        self.id.as_ref()
     }
 }
 
@@ -32,4 +37,5 @@ pub(crate) struct NoteInput {
     content: String,
     project: String,
     tags: Vec<String>,
+    category: Option<String>,
 }

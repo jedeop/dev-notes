@@ -4,8 +4,11 @@ import useNotes from "../common/useNotes";
 import useIntersect from "../common/useIntersect";
 import Loading from "./Loading";
 
-export default function NoteList() {
-  const { data, error, isLoading, isValidating, loadMore } = useNotes();
+interface Props {
+  category?: string,
+}
+export default function NoteList({ category }: Props) {
+  const { data, error, isLoading, isValidating, loadMore } = useNotes(category);
 
   const loadMoreRef = useIntersect(() => {
     if (!data?.[data?.length - 1].list_complete && !isLoading && !isValidating) {

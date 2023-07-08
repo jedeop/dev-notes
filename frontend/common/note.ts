@@ -10,6 +10,7 @@ export interface NoteInputType {
   content: string,
   project: string,
   tags: string[],
+  category: string | undefined,
 }
 
 export interface NoteListData {
