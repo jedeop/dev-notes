@@ -2,14 +2,19 @@ import Link from "next/link";
 import { Coffee, LogIn } from "react-feather";
 import useAdmin from "../common/useAdmin";
 import styles from "../styles/Header.module.css";
+import { Title } from "../common/title";
 
-export default function Header() {
+interface Props {
+  title?: Title,
+}
+export default function Header({ title }: Props) {
   const { admin } = useAdmin();
+
   return (
     <header className={styles.container}>
-      <Link href="/">
+      <Link href={title && title.name != "default" ? `/c/${title.name}` : "/"}>
         <div className={styles.left}>
-          <h1 className={styles.text}>개발 일지</h1>
+          <h1 className={styles.text}>{title?.short_title}</h1>
           <Coffee />
         </div>
       </Link>

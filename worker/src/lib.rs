@@ -1,12 +1,14 @@
 use std::collections::HashMap;
 
 use auth::{check_admin, Claims, Password, PasswordInput};
+use category::Category;
 use note::{Note, NoteInput};
 
 use serde_json::json;
 use worker::*;
 
 mod auth;
+mod category;
 mod note;
 mod utils;
 
@@ -135,6 +137,42 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
                 Ok(admin) => Response::from_json(&json!({ "admin": admin })),
                 Err(err) => {
                     console_error!("Internal Server Error at DELETE /api/note/:id; {}", err);
+                    Response::error("Internal Server Error", 500)
+                }
+            }
+        })
+        .get_async("/api/category/:name", |_req, ctx| async move {
+            match ctx.param("name") {
+                Some(name) => {
+                    let kv = ctx.kv("notes")?;
+                    match kv
+                        .get(&format!("category:{name}"))
+                        .json::<Category>()
+                        .await?
+                    {
+                        Some(category) => Response::from_json(&category),
+                        None => Response::error("Not Found", 404),
+                    }
+                }
+                None => Response::error("Bad Request", 400),
+            }
+        })
+        .post_async("/api/category", |mut req, ctx| async move {
+            match check_admin(&req, &ctx).await {
+                Ok(true) => {
+                    let category = req.json::<Category>().await?;
+
+                    let kv = ctx.kv("notes")?;
+
+                    kv.put(&format!("category:{}", category.name()), &category)?
+                        .execute()
+                        .await?;
+
+                    Response::from_json(&category)
+                }
+                Ok(false) => Response::error("Unauthorized", 401),
+                Err(err) => {
+                    console_error!("Internal Server Error at POST /api/note; {}", err);
                     Response::error("Internal Server Error", 500)
                 }
             }
