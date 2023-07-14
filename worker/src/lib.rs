@@ -177,6 +177,19 @@ pub async fn main(req: Request, env: Env, _ctx: worker::Context) -> Result<Respo
                 }
             }
         })
+        .get_async("/api/categories", |_req, ctx| async move {
+            let kv = ctx.kv("notes")?;
+
+            let categories = kv.list().prefix("category:".to_string()).execute().await?;
+
+            let category_names = categories
+                .keys
+                .iter()
+                .map(|key| &key.name[9..])
+                .collect::<Vec<&str>>();
+
+            Response::from_json(&category_names)
+        })
         .run(req, env)
         .await
 }
